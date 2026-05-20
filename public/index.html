@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upstox Trading Assistant - AI Powered</title>
+    <meta name="description" content="AI-powered trading assistant for Upstox with Claude AI integration">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2d3748;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-connected {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-disconnected {
+            background: #f56565;
+            color: white;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #38a169;
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #e53e3e;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .portfolio-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .portfolio-item .symbol {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .portfolio-item .quantity {
+            color: #718096;
+            font-size: 13px;
+        }
+
+        .portfolio-item .price {
+            font-weight: 600;
+        }
+
+        .price-positive {
+            color: #48bb78;
+        }
+
+        .price-negative {
+            color: #f56565;
+        }
+
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f7fafc;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 85%;
+            line-height: 1.6;
+        }
+
+        .message-user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+        }
+
+        .message-assistant {
+            background: white;
+            border: 2px solid #e2e8f0;
+            color: #2d3748;
+        }
+
+        .message strong {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .suggestion-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+
+        .suggestion-card h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .suggestion-card p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .suggestion-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .suggestion-actions .btn {
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            color: #92400e;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            border: 2px solid #3b82f6;
+            color: #1e3a8a;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            color: #718096;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Upstox Trading Assistant</h1>
+            <div class="status">
+                <span class="status-badge status-disconnected" id="upstoxStatus">Upstox: Disconnected</span>
+                <span class="status-badge status-connected" id="claudeStatus">Claude: Ready</span>
+            </div>
+        </div>
+
+        <div class="alert alert-warning">
+            ⚠️ <strong>Investment Disclaimer:</strong> This is an AI assistant tool. All suggestions are for informational purposes only and not financial advice. Always do your own research before trading.
+        </div>
+
+        <div class="main-grid">
+            <!-- Upstox Connection -->
+            <div class="card">
+                <h2><span class="icon">🔐</span> Upstox Login</h2>
+                <p style="color: #718096; font-size: 14px; margin-bottom: 15px;">
+                    Click below to authenticate with Upstox OAuth
+                </p>
+                <button class="btn btn-primary" onclick="loginUpstox()">
+                    Login with Upstox
+                </button>
+                
+                <div class="alert alert-info" style="margin-top: 15px;">
+                    <strong>Setup Required:</strong><br>
+                    1. Get API credentials from Upstox Developer Console<br>
+                    2. Add your Vercel URL as redirect URI<br>
+                    3. Configure environment variables in Vercel
+                </div>
+            </div>
+
+            <!-- Portfolio Overview -->
+            <div class="card">
+                <h2><span class="icon">💼</span> Portfolio</h2>
+                <div class="stats-grid" id="statsContainer" style="display: none;">
+                    <div class="stat-card">
+                        <div class="label">Total Value</div>
+                        <div class="value" id="totalValue">₹0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Total P&L</div>
+                        <div class="value" id="totalPnL">₹0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Holdings</div>
+                        <div class="value" id="holdingsCount">0</div>
+                    </div>
+                </div>
+                <div id="portfolioContainer">
+                    <div class="empty-state">
+                        <div class="icon">📊</div>
+                        <p>Login to Upstox to view your portfolio</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="refreshPortfolio()" id="refreshBtn" disabled>
+                    Refresh Portfolio
+                </button>
+            </div>
+        </div>
+
+        <!-- Market Analysis -->
+        <div class="card">
+            <h2><span class="icon">🤖</span> Claude AI Analysis</h2>
+            <div class="form-group">
+                <label>Ask Claude about your portfolio or request trading suggestions</label>
+                <textarea id="userQuery" placeholder="Examples:
+• Should I buy more tech stocks?
+• What's my risk exposure?
+• Suggest a diversification strategy
+• Analyze RELIANCE for swing trading" 
+                       onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); analyzeWithClaude(); }"></textarea>
+            </div>
+            <button class="btn btn-success" onclick="analyzeWithClaude()" id="analyzeBtn" disabled>
+                Get AI Suggestion
+            </button>
+
+            <div class="chat-container" id="chatContainer">
+                <div class="empty-state">
+                    <div class="icon">💬</div>
+                    <p>Connect your portfolio to start AI-powered analysis</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trading Suggestions -->
+        <div class="card">
+            <h2><span class="icon">💡</span> AI Trading Suggestions</h2>
+            <div id="suggestionsContainer">
+                <div class="empty-state">
+                    <div class="icon">🎯</div>
+                    <p>Claude's actionable trading suggestions will appear here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = window.location.origin;
+        let upstoxConnected = false;
+        let accessToken = null;
+        let portfolioData = [];
+        let conversationHistory = [];
+
+        // Check for OAuth callback
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            
+            if (code) {
+                handleOAuthCallback(code);
+            }
+        });
+
+        // Login to Upstox
+        function loginUpstox() {
+            // Redirect to Upstox OAuth
+            const clientId = 'YOUR_UPSTOX_API_KEY'; // This will be configured in backend
+            const redirectUri = encodeURIComponent(window.location.origin + '/callback');
+            const authUrl = `https://api.upstox.com/v2/login/authorization/dialog?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}`;
+            
+            alert('OAuth flow will redirect you to Upstox. Make sure your API credentials are configured in Vercel environment variables.');
+            window.location.href = authUrl;
+        }
+
+        // Handle OAuth Callback
+        async function handleOAuthCallback(code) {
+            try {
+                const response = await fetch(`${API_BASE}/api/auth?code=${code}`);
+                const data = await response.json();
+
+                if (data.access_token) {
+                    accessToken = data.access_token;
+                    localStorage.setItem('upstox_access_token', accessToken);
+                    
+                    upstoxConnected = true;
+                    document.getElementById('upstoxStatus').textContent = 'Upstox: Connected';
+                    document.getElementById('upstoxStatus').className = 'status-badge status-connected';
+                    document.getElementById('refreshBtn').disabled = false;
+                    document.getElementById('analyzeBtn').disabled = false;
+
+                    // Clear URL params
+                    window.history.replaceState({}, document.title, window.location.pathname);
+
+                    // Load portfolio
+                    await refreshPortfolio();
+                } else {
+                    throw new Error('Failed to get access token');
+                }
+            } catch (error) {
+                console.error('OAuth Error:', error);
+                alert('Authentication failed. Please try again.');
+            }
+        }
+
+        // Check for existing token
+        const storedToken = localStorage.getItem('upstox_access_token');
+        if (storedToken) {
+            accessToken = storedToken;
+            upstoxConnected = true;
+            document.getElementById('upstoxStatus').textContent = 'Upstox: Connected';
+            document.getElementById('upstoxStatus').className = 'status-badge status-connected';
+            document.getElementById('refreshBtn').disabled = false;
+            document.getElementById('analyzeBtn').disabled = false;
+            refreshPortfolio();
+        }
+
+        // Refresh Portfolio from Upstox
+        async function refreshPortfolio() {
+            if (!accessToken) {
+                alert('Please login to Upstox first');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/api/portfolio`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.portfolio) {
+                    portfolioData = data.portfolio;
+                    displayPortfolio();
+                } else {
+                    throw new Error('No portfolio data received');
+                }
+            } catch (error) {
+                console.error('Portfolio Error:', error);
+                alert('Failed to fetch portfolio. Please check your connection and try again.');
+            }
+        }
+
+        function displayPortfolio() {
+            const container = document.getElementById('portfolioContainer');
+            const statsContainer = document.getElementById('statsContainer');
+            
+            if (portfolioData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📊</div>
+                        <p>No holdings found</p>
+                    </div>
+                `;
+                statsContainer.style.display = 'none';
+                return;
+            }
+
+            let html = '';
+            let totalValue = 0;
+            let totalInvested = 0;
+
+            portfolioData.forEach(stock => {
+                const value = stock.value || (stock.quantity * stock.currentPrice);
+                const invested = stock.quantity * stock.buyPrice;
+                totalValue += value;
+                totalInvested += invested;
+
+                const priceClass = stock.change >= 0 ? 'price-positive' : 'price-negative';
+                const changeSymbol = stock.change >= 0 ? '+' : '';
+
+                html += `
+                    <div class="portfolio-item">
+                        <div>
+                            <div class="symbol">${stock.symbol}</div>
+                            <div class="quantity">${stock.quantity} shares • ${stock.type || 'holding'}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="price">₹${stock.currentPrice.toFixed(2)}</div>
+                            <div class="price ${priceClass}">${changeSymbol}${stock.change}% • P&L: ₹${stock.pnl?.toFixed(2) || 0}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Update stats
+            const totalPnL = totalValue - totalInvested;
+            const totalPnLPercent = ((totalPnL / totalInvested) * 100).toFixed(2);
+            const pnlClass = totalPnL >= 0 ? 'price-positive' : 'price-negative';
+
+            document.getElementById('totalValue').textContent = `₹${totalValue.toFixed(0)}`;
+            document.getElementById('totalPnL').innerHTML = `<span class="${pnlClass}">₹${totalPnL.toFixed(0)}</span>`;
+            document.getElementById('holdingsCount').textContent = portfolioData.length;
+            statsContainer.style.display = 'grid';
+        }
+
+        // Analyze with Claude
+        async function analyzeWithClaude() {
+            const query = document.getElementById('userQuery').value.trim();
+            
+            if (!query) {
+                alert('Please enter a question');
+                return;
+            }
+
+            if (!upstoxConnected) {
+                alert('Please connect to Upstox first');
+                return;
+            }
+
+            const chatContainer = document.getElementById('chatContainer');
+            
+            // Add user message
+            addMessage('user', query);
+            document.getElementById('userQuery').value = '';
+
+            // Show loading
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message message-assistant';
+            loadingDiv.id = 'loading-message';
+            loadingDiv.innerHTML = '<div class="loading"></div> Claude is analyzing your portfolio...';
+            chatContainer.appendChild(loadingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const response = await fetch(`${API_BASE}/api/analyze`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        portfolio: portfolioData,
+                        conversationHistory: conversationHistory
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Remove loading message
+                document.getElementById('loading-message')?.remove();
+
+                if (data.response) {
+                    conversationHistory = data.conversationHistory || [];
+                    addMessage('assistant', data.response);
+                    parseSuggestions(data.response);
+                } else {
+                    throw new Error('No response from Claude');
+                }
+
+            } catch (error) {
+                console.error('Analysis Error:', error);
+                document.getElementById('loading-message')?.remove();
+                addMessage('assistant', 'Sorry, I encountered an error analyzing your request. Please try again.');
+            }
+        }
+
+        function addMessage(role, content) {
+            const chatContainer = document.getElementById('chatContainer');
+            
+            // Remove empty state if exists
+            const emptyState = chatContainer.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${role}`;
+            messageDiv.innerHTML = `<strong>${role === 'user' ? 'You' : 'Claude AI'}</strong>${content}`;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function parseSuggestions(text) {
+            // Parse for trading suggestions
+            const hasAction = text.includes('ACTION:') || text.match(/🎯.*?(BUY|SELL|HOLD)/i);
+            
+            if (hasAction) {
+                const suggestionsContainer = document.getElementById('suggestionsContainer');
+                
+                // Remove empty state
+                const emptyState = suggestionsContainer.querySelector('.empty-state');
+                if (emptyState) {
+                    emptyState.remove();
+                }
+
+                const suggestionCard = document.createElement('div');
+                suggestionCard.className = 'suggestion-card';
+                suggestionCard.innerHTML = `
+                    <h3>🎯 New Trading Suggestion</h3>
+                    <p>${text}</p>
+                    <div class="suggestion-actions">
+                        <button class="btn btn-success" onclick="showOrderForm(this, \`${text.replace(/`/g, '\\`')}\`)">Place Order</button>
+                        <button class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Dismiss</button>
+                    </div>
+                `;
+                suggestionsContainer.insertBefore(suggestionCard, suggestionsContainer.firstChild);
+            }
+        }
+
+        function showOrderForm(button, suggestion) {
+            const card = button.closest('.suggestion-card');
+            
+            // Parse suggestion for details
+            const symbolMatch = suggestion.match(/SYMBOL:?\s*([A-Z]+)/i);
+            const quantityMatch = suggestion.match(/QUANTITY:?\s*(\d+)/i);
+            const actionMatch = suggestion.match(/ACTION:?\s*(BUY|SELL)/i);
+            
+            const symbol = symbolMatch ? symbolMatch[1] : '';
+            const quantity = quantityMatch ? quantityMatch[1] : '';
+            const action = actionMatch ? actionMatch[1] : 'BUY';
+
+            card.innerHTML = `
+                <h3>📝 Order Details</h3>
+                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Symbol</label>
+                        <input type="text" value="${symbol}" id="order-symbol" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Quantity</label>
+                        <input type="number" value="${quantity}" id="order-quantity" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Action</label>
+                        <select id="order-action" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+                            <option value="BUY" ${action === 'BUY' ? 'selected' : ''}>BUY</option>
+                            <option value="SELL" ${action === 'SELL' ? 'selected' : ''}>SELL</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px;">Order Type</label>
+                        <select id="order-type" style="width: 100%; padding: 8px; border-radius: 5px; border: none;">
+                            <option value="MARKET">MARKET</option>
+                            <option value="LIMIT">LIMIT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="suggestion-actions">
+                    <button class="btn btn-success" onclick="executeTrade(this)">Confirm & Execute</button>
+                    <button class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">Cancel</button>
+                </div>
+            `;
+        }
+
+        async function executeTrade(button) {
+            if (!accessToken) {
+                alert('Please login to Upstox first');
+                return;
+            }
+
+            const card = button.closest('.suggestion-card');
+            const symbol = document.getElementById('order-symbol').value;
+            const quantity = document.getElementById('order-quantity').value;
+            const action = document.getElementById('order-action').value;
+            const orderType = document.getElementById('order-type').value;
+
+            if (!symbol || !quantity) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (!confirm(`Confirm ${action} order for ${quantity} shares of ${symbol}?`)) {
+                return;
+            }
+
+            try {
+                button.disabled = true;
+                button.textContent = 'Placing Order...';
+
+                const response = await fetch(`${API_BASE}/api/place-order`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({
+                        symbol: symbol,
+                        quantity: quantity,
+                        transaction_type: action,
+                        order_type: orderType,
+                        product: 'D', // Delivery
+                        price: 0
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    card.innerHTML = `
+                        <h3>✅ Order Placed Successfully</h3>
+                        <p>Order ID: ${data.order_id}</p>
+                        <p>${action} ${quantity} shares of ${symbol}</p>
+                    `;
+                    card.style.background = 'linear-gradient(135deg, #48bb78 0%, #38a169 100%)';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '0';
+                        setTimeout(() => card.remove(), 300);
+                    }, 5000);
+
+                    // Refresh portfolio
+                    await refreshPortfolio();
+                } else {
+                    throw new Error(data.error || 'Order failed');
+                }
+
+            } catch (error) {
+                console.error('Order Error:', error);
+                alert('Failed to place order: ' + error.message);
+                button.disabled = false;
+                button.textContent = 'Confirm & Execute';
+            }
+        }
+    </script>
+</body>
+</html>
