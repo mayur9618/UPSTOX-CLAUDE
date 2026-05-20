@@ -1,0 +1,17 @@
+{
+  "name": "upstox-trading-assistant",
+  "version": "1.0.0",
+  "description": "AI-powered trading assistant with Upstox and Claude integration",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node api/server.js",
+    "build": "echo 'Build complete'"
+  },
+  "keywords": ["upstox", "trading", "claude", "ai"],
+  "author": "Mayur",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dotenv": "^16.3.1"
+  }
+}

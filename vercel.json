@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
+    }
+  ],
+  "env": {
+    "UPSTOX_API_KEY": "@upstox_api_key",
+    "UPSTOX_API_SECRET": "@upstox_api_secret",
+    "UPSTOX_REDIRECT_URI": "@upstox_redirect_uri",
+    "ANTHROPIC_API_KEY": "@anthropic_api_key"
+  }
+}
